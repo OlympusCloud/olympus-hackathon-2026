@@ -1,40 +1,37 @@
 # `sdk/dart-sample/` — minimal Flutter app calling hosted Ceres
 
-Output of hackathon work item **H7** (expose hosted Ceres via `olympus_sdk` — gateway route + Dart SDK).
+Output of hackathon work item **H7**. Calls the deployed Ceres agent through `olympus_sdk` and prints the report.
 
-## What lands here
+## Two modes
 
-A tiny Flutter app that:
+| Mode | Command | Use |
+|---|---|---|
+| UI | `flutter run -d chrome` | Live demo; type a query, get a Ceres report |
+| Headless | `HEADLESS=1 dart run lib/main.dart` | Single round-trip → stdout. The `make demo` path. |
 
-1. Authenticates against the Olympus API gateway with a demo tenant JWT.
-2. Calls `olympusSdk.ai.runAgent('ceres', query: 'low-stock report')`.
-3. Renders the returned `Report` + `recommendations` + `stock_alerts` in a stripped-down list view.
-
-The point: show that from a customer app's perspective, calling a Pantheon agent that happens to be hosted on Vertex AI Agent Runtime is **one method call**, indistinguishable from calling one hosted on Cloud Run. That is the AI-native PaaS abstraction working as designed.
-
-## Dependencies
-
-- `olympus_sdk` (git dep — `git: url: https://github.com/OlympusCloud/olympus-sdk-dart`)
-- Flutter ≥ 3.27 stable
-- A demo tenant JWT (issued at demo time; not shipped)
-
-## Files
-
-- `pubspec.yaml` — SDK git dep + Flutter
-- `lib/main.dart` — `MyApp` + the single screen
-- `lib/demo_credentials.dart.example` — template; copy to `demo_credentials.dart` (gitignored)
-- `test/ceres_call_test.dart` — one widget test verifying the SDK call wiring
-
-## Run
+## Setup
 
 ```bash
 cd sdk/dart-sample
 flutter pub get
 cp lib/demo_credentials.dart.example lib/demo_credentials.dart
-# fill in OLYMPUS_GATEWAY_URL + DEMO_TENANT_JWT
-flutter run -d chrome
+# edit demo_credentials.dart with the values from terraform output + a demo tenant JWT
 ```
+
+`demo_credentials.dart` is gitignored — never commit real values.
+
+## What it does
+
+1. Constructs an `OlympusClient` against the gateway in `demo_credentials.dart`.
+2. Calls `client.agent.chat(...)` — the existing canonical agent surface in `olympus_sdk`. The gateway routes the request to the hosted Ceres agent on Vertex AI Agent Runtime.
+3. Renders the returned message in the UI, or prints it to stdout in headless mode.
+
+The point of this app: show that from a customer-app perspective, calling a Pantheon agent that happens to be hosted on Vertex AI Agent Runtime is **one method call**, indistinguishable from calling one hosted on Cloud Run. That is the AI-native PaaS abstraction working as designed.
 
 ## Status
 
-⬜ Pending — waiting on H5 (deployed agent) + H7 (gateway route landing in private monorepo).
+Wire-ready. Will work as soon as:
+
+1. Terraform has applied (see `../terraform/README-deploy.md`)
+2. ADK manifest has deployed (see `../adk/deploy.sh`)
+3. A demo tenant JWT has been minted and dropped into `demo_credentials.dart`
