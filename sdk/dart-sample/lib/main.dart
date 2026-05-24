@@ -36,13 +36,14 @@ Future<String> _callCeres(String query) async {
     baseUrl: DemoCredentials.gatewayUrl,
     token: DemoCredentials.tenantJwt,
   );
-  final response = await client.agent.chat(
+  // One SDK call. The gateway routes /agent/vertex/ceres to the hosted
+  // Ceres agent on Vertex AI Agent Engine. The caller has no idea which
+  // substrate the agent runs on — that's the AI-native PaaS abstraction.
+  final response = await client.agent.callVertexAgent(
+    agentName: 'ceres',
     message: query,
     tenantId: DemoCredentials.tenantId,
     userId: DemoCredentials.userId,
-    sessionId: 'hackathon-demo-${DateTime.now().millisecondsSinceEpoch}',
-    shellType: 'customer',
-    domain: 'inventory',
   );
   return response.message;
 }
