@@ -1,0 +1,62 @@
+# Build / language outputs
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+ios/Flutter/Generated.xcconfig
+ios/Runner/GeneratedPluginRegistrant.*
+android/.gradle/
+android/app/build/
+android/build/
+
+# Terraform
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.backup
+*.tfplan
+terraform.tfvars
+terraform.tfvars.json
+
+# Secrets / credentials (must never be committed)
+*.pem
+*.key
+*.crt
+*-key.json
+service-account*.json
+gcp-credentials*.json
+.env
+.env.*
+!.env.example
+
+# Editor / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Python (if any helper scripts)
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Node (if demo uses any JS tooling)
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Logs
+*.log
+logs/
+
+# Demo recording staging area
+demo/raw-footage/
+demo/*.mov
+demo/*.mp4
+!demo/README.md
