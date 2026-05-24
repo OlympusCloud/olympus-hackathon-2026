@@ -107,6 +107,9 @@ def main() -> int:
         "google-cloud-aiplatform[agent_engines,adk]",
         "google-adk",
     ]
+    # Bundle the local agent package so the runtime can `import agent`.
+    # Without this the deserialized AdkApp imports fail at startup.
+    extra_packages = ["./agent"]
 
     existing = find_existing(args.display_name)
     if existing:
@@ -114,12 +117,14 @@ def main() -> int:
         remote = existing.update(
             agent_engine=app,
             requirements=requirements,
+            extra_packages=extra_packages,
         )
     else:
         print("\n[create] new engine")
         remote = agent_engines.create(
             agent_engine=app,
             requirements=requirements,
+            extra_packages=extra_packages,
             display_name=args.display_name,
             description="Ceres inventory agent — hackathon submission. Faithful port of the Pantheon LangGraph workflow.",
             service_account=args.service_account,
