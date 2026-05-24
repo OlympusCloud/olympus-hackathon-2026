@@ -38,7 +38,7 @@ from .tools import (
 # A single model variant for the public carve-out. In production this is
 # the Olympus Ether router endpoint, which selects the cheapest capable
 # Gemini variant per request + per-tenant budget. The router is private.
-MODEL = "gemini-2.0-flash"
+MODEL = "gemini-2.5-flash"
 
 # ---------------------------------------------------------------------------
 # Sub-agents — one per analytical intent. Each one carries the inventory
