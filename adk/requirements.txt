@@ -1,0 +1,7 @@
+# Local deployment env. Pin minor versions; let micro versions float so
+# Google's bug fixes flow through. The Agent Engine runtime resolves its
+# own copy of these requirements from PyPI when the agent is deployed.
+
+google-cloud-aiplatform[agent_engines,adk] ~= 1.95
+google-adk ~= 1.5
+google-cloud-storage ~= 2.18
