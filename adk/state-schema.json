@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/OlympusCloud/olympus-hackathon-2026/adk/state-schema.json",
+  "title": "CeresState",
+  "description": "Session state for the Ceres inventory agent. Mirrors backend/python/app/agents/pantheon/ceres/state.py one-to-one.",
+  "type": "object",
+  "properties": {
+    "session_id":         { "type": "string" },
+    "tenant_id":          { "type": "string", "description": "Required. Enforced by spec.policies.requireTenantIdInRequest." },
+    "user_id":            { "type": "string" },
+    "query":              { "type": "string" },
+    "operation":          { "type": "string", "enum": ["query", "levels", "reorder", "forecast", "waste", "supplier", "valuation", "report"] },
+
+    "intent": {
+      "type": ["string", "null"],
+      "enum": ["check_levels", "reorder_analysis", "demand_forecast", "waste_analysis", "supplier_analysis", "valuation", "generate_report", "unknown", null]
+    },
+
+    "inventory_items":     { "type": ["array", "null"], "items": { "type": "object" } },
+    "inventory_summary":   { "type": ["object", "null"] },
+    "location_filter":     { "type": ["array", "null"], "items": { "type": "string" } },
+    "category_filter":     { "type": ["array", "null"], "items": { "type": "string" } },
+
+    "stock_alerts":        { "type": ["array", "null"], "items": { "type": "object" } },
+    "reorder_suggestions": { "type": ["array", "null"], "items": { "type": "object" } },
+    "demand_forecasts":    { "type": ["array", "null"], "items": { "type": "object" } },
+    "waste_data":          { "type": ["array", "null"], "items": { "type": "object" } },
+    "waste_analysis":      { "type": ["object", "null"] },
+    "supplier_data":       { "type": ["array", "null"], "items": { "type": "object" } },
+    "supplier_analysis":   { "type": ["object", "null"] },
+    "valuation":           { "type": ["object", "null"] },
+
+    "report":              { "type": ["object", "null"] },
+    "response":            { "type": ["string", "null"] },
+
+    "alerts":              { "type": "array", "items": { "type": "string" }, "default": [] },
+    "recommendations":     { "type": "array", "items": { "type": "string" }, "default": [] },
+    "steps_taken":         { "type": "array", "items": { "type": "string" }, "default": [] },
+    "debug_logs":          { "type": "array", "items": { "type": "string" }, "default": [] },
+
+    "error":               { "type": ["string", "null"] }
+  },
+  "required": ["session_id", "tenant_id", "user_id", "query", "operation"]
+}

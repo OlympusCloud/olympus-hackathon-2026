@@ -1,0 +1,4 @@
+# CODEOWNERS — Olympus Hackathon 2026 carve-out
+# All paths require maintainer review (IP gate).
+
+*       @scottwhoughton
