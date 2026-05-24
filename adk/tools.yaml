@@ -1,0 +1,104 @@
+# Ceres tools — names only. Implementations live in the private monorepo
+# at backend/python/app/agents/pantheon/ceres/ and a few neighboring service
+# modules; they are deliberately not vendored here per the IP gate in
+# ../SECURITY.md.
+#
+# The hosted Ceres agent on Vertex AI Agent Runtime resolves each tool
+# name via a private tool-registry endpoint exposed by the Olympus API
+# gateway. The gateway authenticates the agent by service-account identity
+# and forwards each invocation to the correct backend handler.
+
+apiVersion: agent-builder.googleapis.com/v1beta1
+kind: ToolRegistry
+
+tools:
+
+  - name: load_inventory
+    description: >
+      Fetch the current inventory snapshot for a tenant, optionally filtered
+      to a subset of locations or categories. Returns rows with current_qty,
+      par_level, reorder_point, unit_cost, SKU metadata, and last_updated.
+    inputs:
+      tenant_id:        { type: string, required: true }
+      location_filter:  { type: array<string>, required: false }
+      category_filter:  { type: array<string>, required: false }
+    outputs:
+      inventory_items:   array<object>
+      inventory_summary: object
+
+  - name: evaluate_stock_levels
+    description: >
+      For each inventory item, classify stock status as critical / low /
+      normal / overstocked / out_of_stock against the configured thresholds.
+      Produces a stock_alerts list of items requiring attention.
+    inputs:
+      inventory_items: { type: array<object>, required: true }
+      thresholds:      { type: object, required: true }
+    outputs:
+      stock_alerts: array<object>
+
+  - name: compute_reorder_suggestions
+    description: >
+      Generate reorder quantity suggestions for items at or below reorder
+      point, sized to the par level minus current quantity, with supplier
+      hint when available.
+    inputs:
+      inventory_items: { type: array<object>, required: true }
+      thresholds:      { type: object, required: true }
+    outputs:
+      reorder_suggestions: array<object>
+
+  - name: forecast_demand
+    description: >
+      Produce per-SKU demand forecasts for the next horizon (default 14
+      days) using historical sales + seasonality + day-of-week + local
+      events. Output includes expected_qty, lower / upper bounds, and
+      confidence.
+    inputs:
+      inventory_items: { type: array<object>, required: true }
+      location_filter: { type: array<string>, required: false }
+      category_filter: { type: array<string>, required: false }
+    outputs:
+      demand_forecasts: array<object>
+
+  - name: load_waste_data
+    description: >
+      Fetch shrink / waste / expiry events for a tenant over the trailing
+      30 days and summarize waste rate, top waste SKUs, and waste cost.
+    inputs:
+      tenant_id:       { type: string, required: true }
+      location_filter: { type: array<string>, required: false }
+    outputs:
+      waste_data:     array<object>
+      waste_analysis: object
+
+  - name: load_supplier_data
+    description: >
+      Fetch supplier scorecard data (on-time rate, fill rate, defect rate,
+      price-variance vs catalog) and summarize per supplier with a
+      reliability score. Flags suppliers below the reliability threshold.
+    inputs:
+      tenant_id: { type: string, required: true }
+    outputs:
+      supplier_data:     array<object>
+      supplier_analysis: object
+
+  - name: compute_inventory_valuation
+    description: >
+      Compute total inventory valuation at cost and at retail, broken down
+      by category and location.
+    inputs:
+      inventory_items: { type: array<object>, required: true }
+    outputs:
+      valuation: object
+
+  - name: dispatch_alerts
+    description: >
+      Send the alert list to the tenant's configured notification surfaces
+      (in-app, email, SMS, Slack, Teams, voice) via the Olympus notify
+      router. Returns nothing on success; failures are surfaced via
+      observability, not the agent state.
+    inputs:
+      tenant_id: { type: string, required: true }
+      alerts:    { type: array<string>, required: true }
+    outputs: {}
