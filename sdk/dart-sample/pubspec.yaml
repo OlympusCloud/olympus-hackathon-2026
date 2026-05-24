@@ -1,0 +1,24 @@
+name: olympus_hackathon_demo
+description: Minimal Flutter app that calls the hackathon Ceres agent via olympus_sdk.
+publish_to: none
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+  flutter: ">=3.27.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  olympus_sdk:
+    git:
+      url: https://github.com/OlympusCloud/olympus-sdk-dart
+      ref: main
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
