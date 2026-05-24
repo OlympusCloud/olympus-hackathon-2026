@@ -1,0 +1,196 @@
+# Ceres (inventory & supply-chain) — Agent Development Kit manifest
+#
+# Faithful port of the Pantheon Ceres LangGraph workflow (private monorepo
+# at backend/python/app/agents/pantheon/ceres/) to Google Vertex AI Agent
+# Builder + ADK. Preserves the 11-node graph topology, 7 intents, and
+# TypedDict state shape one-to-one. Behavior is identical; runtime
+# substrate is the only thing that changes.
+#
+# Public-safe per the IP gate in ../SECURITY.md:
+# - Node / state / intent / threshold names: PUBLIC (this file)
+# - Node prompts: PUBLIC, but describe role only (no Ether routing policy)
+# - Tool implementations: PRIVATE (named here, bodies in private monorepo)
+# - Ether tier catalog / weights / classifier: PRIVATE (out of scope)
+
+apiVersion: agent-builder.googleapis.com/v1beta1
+kind: Agent
+
+metadata:
+  name: ceres
+  displayName: "Ceres — Inventory & Supply-Chain"
+  description: >
+    Customer-facing Pantheon agent that classifies an inventory request,
+    fetches scoped data, runs one of six analyses (levels, reorder,
+    demand forecast, waste, supplier, valuation), builds a report, and
+    triggers alerts. Multi-tenant, isolated by tenant_id.
+  version: "1.0.0-hackathon"
+  labels:
+    olympus.pantheon.agent: ceres
+    olympus.substrate: vertex-agent-runtime
+    olympus.hackathon: "2026"
+
+spec:
+  # ---- Model routing -----------------------------------------------------
+  # Inference is routed through the Olympus Ether layer, which selects the
+  # cheapest capable Gemini variant per request + per-tenant budget. Ether
+  # is treated as a model endpoint here; its tier catalog is not exposed.
+  model:
+    provider: vertex-ai
+    endpoint: ether-gemini-router
+    fallback: gemini-2.5-flash
+
+  # ---- Session state schema ---------------------------------------------
+  # Mirrors backend/python/app/agents/pantheon/ceres/state.py CeresState.
+  stateSchemaRef: ./state-schema.json
+
+  # ---- Tools (names only; implementations stay private) -----------------
+  toolsRef: ./tools.yaml
+
+  # ---- Configurable thresholds (defaults match the LangGraph source) ----
+  thresholds:
+    critical_stock: 0.25   # below 25% of par level
+    low_stock: 0.50        # below 50% of par level
+    overstock: 1.50        # above 150% of par level
+    waste_alert: 0.05      # 5% waste rate triggers an alert
+    supplier_reliability: 0.80  # below 80% reliability flagged
+
+  # ---- Memory ------------------------------------------------------------
+  memory:
+    backend: agent-memory-bank
+    isolation: tenant
+    keyField: tenant_id
+    ttlDays: 90
+
+  # ---- Graph topology (11 nodes, 2 routers, 1 entry, 1 terminal) --------
+  graph:
+    entry: classify_intent
+    nodes:
+
+      - name: classify_intent
+        kind: llm
+        prompt: |
+          You are the Ceres inventory agent. Read the user query and map it
+          to one of the intents in the state schema's CeresIntent enum:
+          check_levels, reorder_analysis, demand_forecast, waste_analysis,
+          supplier_analysis, valuation, generate_report, unknown.
+          Write the result to state.intent. Do not call any tools.
+        outputs: [intent]
+
+      - name: fetch_inventory
+        kind: tool
+        tool: load_inventory
+        inputs: [tenant_id, location_filter, category_filter]
+        outputs: [inventory_items, inventory_summary]
+
+      - name: check_levels
+        kind: tool
+        tool: evaluate_stock_levels
+        inputs: [inventory_items, thresholds]
+        outputs: [stock_alerts]
+
+      - name: analyze_reorders
+        kind: tool
+        tool: compute_reorder_suggestions
+        inputs: [inventory_items, thresholds]
+        outputs: [reorder_suggestions]
+
+      - name: forecast_demand
+        kind: tool
+        tool: forecast_demand
+        inputs: [inventory_items, location_filter, category_filter]
+        outputs: [demand_forecasts]
+
+      - name: analyze_waste
+        kind: tool
+        tool: load_waste_data
+        inputs: [tenant_id, location_filter]
+        outputs: [waste_data, waste_analysis]
+
+      - name: analyze_suppliers
+        kind: tool
+        tool: load_supplier_data
+        inputs: [tenant_id]
+        outputs: [supplier_data, supplier_analysis]
+
+      - name: calculate_valuation
+        kind: tool
+        tool: compute_inventory_valuation
+        inputs: [inventory_items]
+        outputs: [valuation]
+
+      - name: handle_query
+        kind: llm
+        prompt: |
+          You are the Ceres inventory agent. The user query did not map to
+          one of the analytical intents. Answer the query directly using
+          context from state. Be concise. Do not call any tools.
+        outputs: [response]
+
+      - name: build_report
+        kind: llm
+        prompt: |
+          Compose a structured inventory report from the analysis outputs
+          present in state (stock_alerts, reorder_suggestions, demand_forecasts,
+          waste_analysis, supplier_analysis, valuation). Include a top-line
+          summary, the relevant findings, and a recommendations list. Write
+          to state.report and state.response. Write any items requiring
+          human attention to state.alerts and state.recommendations.
+        outputs: [report, response, alerts, recommendations]
+
+      - name: send_alerts
+        kind: tool
+        tool: dispatch_alerts
+        inputs: [tenant_id, alerts]
+        outputs: []
+
+    edges:
+      # classify_intent → intent_router
+      - from: classify_intent
+        condition:
+          kind: router
+          name: intent_router
+          # If intent ∈ {check_levels, reorder, forecast, waste, supplier,
+          # valuation, generate_report} → fetch_inventory.
+          # If intent == unknown → handle_query.
+          options:
+            fetch_inventory: fetch_inventory
+            handle_query: handle_query
+
+      # fetch_inventory → analysis_router
+      - from: fetch_inventory
+        condition:
+          kind: router
+          name: analysis_router
+          # Routes to the single analysis node matching state.intent.
+          # generate_report fans into check_levels by convention (full sweep).
+          options:
+            check_levels: check_levels
+            analyze_reorders: analyze_reorders
+            forecast_demand: forecast_demand
+            analyze_waste: analyze_waste
+            analyze_suppliers: analyze_suppliers
+            calculate_valuation: calculate_valuation
+
+      # All analyses + handle_query converge at build_report
+      - { from: check_levels,        to: build_report }
+      - { from: analyze_reorders,    to: build_report }
+      - { from: forecast_demand,     to: build_report }
+      - { from: analyze_waste,       to: build_report }
+      - { from: analyze_suppliers,   to: build_report }
+      - { from: calculate_valuation, to: build_report }
+      - { from: handle_query,        to: build_report }
+
+      # build_report → send_alerts → END
+      - { from: build_report, to: send_alerts }
+      - { from: send_alerts,  to: END }
+
+  # ---- Observability -----------------------------------------------------
+  observability:
+    sentryDsnSecretRef: projects/olympuscloud-dev/secrets/olympus-app-sentry-dsn-dev/versions/latest
+    cloudTraceSampleRate: 1.0
+    logPantheonAgentRunsTable: pantheon_agent_runs  # ClickHouse table; one row per run
+
+  # ---- Tenant isolation enforcement -------------------------------------
+  policies:
+    requireTenantIdInRequest: true
+    rejectIfMemoryReadCrossesTenantBoundary: true
