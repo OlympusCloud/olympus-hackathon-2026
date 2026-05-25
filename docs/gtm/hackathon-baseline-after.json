@@ -1,0 +1,230 @@
+{
+  "_meta": {
+    "captured_at": "2026-05-25T00:23:49Z",
+    "resource_name": "projects/449595477159/locations/us-central1/reasoningEngines/9005495561473753088",
+    "model": "gemini-2.5-flash",
+    "tenant_id": "demo-tenant-a",
+    "runs_per_intent": 3,
+    "substrate": "vertex-agent-engine",
+    "ip_safe": true,
+    "purpose": "AFTER-side baseline for H2/H8. The BEFORE-side baseline comes from pantheon_agent_runs ClickHouse rows for the Cloud-Run Ceres deployment (see hackathon-baseline.json for the query template)."
+  },
+  "per_intent": {
+    "check_levels": {
+      "runs": 3,
+      "p50_latency_ms": 8050.8,
+      "p95_latency_ms": 8938.2,
+      "avg_total_tokens": 5081.3,
+      "avg_events_count": 7,
+      "raw_runs": [
+        {
+          "latency_ms": 8543.8,
+          "events_count": 7,
+          "prompt_tokens": 4298,
+          "candidates_tokens": 210,
+          "thoughts_tokens": 538,
+          "total_tokens": 5046,
+          "final_text_chars": 149
+        },
+        {
+          "latency_ms": 8050.8,
+          "events_count": 7,
+          "prompt_tokens": 4186,
+          "candidates_tokens": 180,
+          "thoughts_tokens": 804,
+          "total_tokens": 5170,
+          "final_text_chars": 63
+        },
+        {
+          "latency_ms": 7997.6,
+          "events_count": 7,
+          "prompt_tokens": 4227,
+          "candidates_tokens": 194,
+          "thoughts_tokens": 607,
+          "total_tokens": 5028,
+          "final_text_chars": 112
+        }
+      ]
+    },
+    "reorder_analysis": {
+      "runs": 3,
+      "p50_latency_ms": 6288.3,
+      "p95_latency_ms": 23006.5,
+      "avg_total_tokens": 6292.7,
+      "avg_events_count": 7,
+      "raw_runs": [
+        {
+          "latency_ms": 15576.2,
+          "events_count": 7,
+          "prompt_tokens": 7469,
+          "candidates_tokens": 207,
+          "thoughts_tokens": 2279,
+          "total_tokens": 9955,
+          "final_text_chars": 147
+        },
+        {
+          "latency_ms": 5798.3,
+          "events_count": 7,
+          "prompt_tokens": 3804,
+          "candidates_tokens": 192,
+          "thoughts_tokens": 387,
+          "total_tokens": 4383,
+          "final_text_chars": 111
+        },
+        {
+          "latency_ms": 6288.3,
+          "events_count": 7,
+          "prompt_tokens": 3902,
+          "candidates_tokens": 201,
+          "thoughts_tokens": 437,
+          "total_tokens": 4540,
+          "final_text_chars": 133
+        }
+      ]
+    },
+    "demand_forecast": {
+      "runs": 3,
+      "p50_latency_ms": 3372.1,
+      "p95_latency_ms": 3809.3,
+      "avg_total_tokens": 1697,
+      "avg_events_count": 3,
+      "raw_runs": [
+        {
+          "latency_ms": 3615.0,
+          "events_count": 3,
+          "prompt_tokens": 1479,
+          "candidates_tokens": 33,
+          "thoughts_tokens": 143,
+          "total_tokens": 1655,
+          "final_text_chars": 101
+        },
+        {
+          "latency_ms": 2503.6,
+          "events_count": 3,
+          "prompt_tokens": 1479,
+          "candidates_tokens": 20,
+          "thoughts_tokens": 130,
+          "total_tokens": 1629,
+          "final_text_chars": 39
+        },
+        {
+          "latency_ms": 3372.1,
+          "events_count": 3,
+          "prompt_tokens": 1479,
+          "candidates_tokens": 32,
+          "thoughts_tokens": 296,
+          "total_tokens": 1807,
+          "final_text_chars": 102
+        }
+      ]
+    },
+    "waste_analysis": {
+      "runs": 3,
+      "p50_latency_ms": 2890.5,
+      "p95_latency_ms": 3057.4,
+      "avg_total_tokens": 1600.3,
+      "avg_events_count": 3,
+      "raw_runs": [
+        {
+          "latency_ms": 2983.2,
+          "events_count": 3,
+          "prompt_tokens": 1409,
+          "candidates_tokens": 23,
+          "thoughts_tokens": 151,
+          "total_tokens": 1583,
+          "final_text_chars": 45
+        },
+        {
+          "latency_ms": 2767.6,
+          "events_count": 3,
+          "prompt_tokens": 1409,
+          "candidates_tokens": 19,
+          "thoughts_tokens": 157,
+          "total_tokens": 1585,
+          "final_text_chars": 39
+        },
+        {
+          "latency_ms": 2890.5,
+          "events_count": 3,
+          "prompt_tokens": 1409,
+          "candidates_tokens": 19,
+          "thoughts_tokens": 205,
+          "total_tokens": 1633,
+          "final_text_chars": 39
+        }
+      ]
+    },
+    "supplier_analysis": {
+      "runs": 3,
+      "p50_latency_ms": 3043.6,
+      "p95_latency_ms": 6041.1,
+      "avg_total_tokens": 1983.7,
+      "avg_events_count": 3.7,
+      "raw_runs": [
+        {
+          "latency_ms": 2856.4,
+          "events_count": 3,
+          "prompt_tokens": 1389,
+          "candidates_tokens": 22,
+          "thoughts_tokens": 202,
+          "total_tokens": 1613,
+          "final_text_chars": 41
+        },
+        {
+          "latency_ms": 4708.9,
+          "events_count": 5,
+          "prompt_tokens": 2265,
+          "candidates_tokens": 94,
+          "thoughts_tokens": 380,
+          "total_tokens": 2739,
+          "final_text_chars": 209
+        },
+        {
+          "latency_ms": 3043.6,
+          "events_count": 3,
+          "prompt_tokens": 1389,
+          "candidates_tokens": 19,
+          "thoughts_tokens": 191,
+          "total_tokens": 1599,
+          "final_text_chars": 39
+        }
+      ]
+    },
+    "valuation": {
+      "runs": 3,
+      "p50_latency_ms": 2940.0,
+      "p95_latency_ms": 3406.9,
+      "avg_total_tokens": 1634,
+      "avg_events_count": 3,
+      "raw_runs": [
+        {
+          "latency_ms": 3199.4,
+          "events_count": 3,
+          "prompt_tokens": 1401,
+          "candidates_tokens": 28,
+          "thoughts_tokens": 273,
+          "total_tokens": 1702,
+          "final_text_chars": 76
+        },
+        {
+          "latency_ms": 2766.3,
+          "events_count": 3,
+          "prompt_tokens": 1401,
+          "candidates_tokens": 30,
+          "thoughts_tokens": 151,
+          "total_tokens": 1582,
+          "final_text_chars": 96
+        },
+        {
+          "latency_ms": 2940.0,
+          "events_count": 3,
+          "prompt_tokens": 1401,
+          "candidates_tokens": 23,
+          "thoughts_tokens": 194,
+          "total_tokens": 1618,
+          "final_text_chars": 44
+        }
+      ]
+    }
+  }
+}
