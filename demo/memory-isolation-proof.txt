@@ -1,0 +1,28 @@
+=== Vertex AI Agent Engine memory isolation proof ===
+project          olympuscloud-dev
+location         us-central1
+resource_name    projects/449595477159/locations/us-central1/reasoningEngines/9005495561473753088
+tenant_a         demo-tenant-a
+tenant_b         demo-tenant-b
+
+  [PASS] contract: scoped user_ids built  — demo-tenant-a:isolation-proof-user / demo-tenant-b:isolation-proof-user
+  [PASS] contract: round-trip parse  — parsed=(demo-tenant-a, isolation-proof-user)
+  [PASS] connected to Agent Engine  — projects/449595477159/locations/us-central1/reasoningEngines/9005495561473753088
+  [PASS] tenant A: created session  — id=3204409060128456704
+  [PASS] tenant A: streamed agent trace  — 7 events, final text 73 chars
+  [PASS] tenant A: own session is listed under tenant A  — |sessions(A)|=1
+  [PASS] tenant B: tenant A's session is NOT visible under tenant B  — |sessions(B)|=0 — isolated
+  [PASS] failure injection: empty tenant rejected
+  [PASS] failure injection: missing-prefix string rejected
+  [PASS] cleanup: tenant A session deleted
+
+========================================================
+ISOLATION PROVEN
+========================================================
+
+Tenant A wrote a session + agent trace to Agent Engine.
+Tenant B's session-list call did not see it.
+The tenant_user_id contract rejected both failure injections.
+
+Capture this output into demo/memory-isolation-proof.txt + add
+a Guardian Ledger row referencing it (H6 ac-3).
